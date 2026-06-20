@@ -143,7 +143,7 @@ export default function Assessment() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/analyze-profile', {
+      const response = await fetch('/analyze-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -151,7 +151,7 @@ export default function Assessment() {
       const analysis = await response.json();
       
       // Generate initial daily challenges
-      const challResponse = await fetch('http://localhost:5000/generate-challenges', {
+      const challResponse = await fetch('/generate-challenges', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)

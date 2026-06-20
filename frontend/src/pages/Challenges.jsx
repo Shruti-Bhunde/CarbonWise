@@ -82,7 +82,7 @@ export default function Challenges() {
       const profile = getProfile();
       if (!profile) return;
       
-      const challResponse = await fetch('http://localhost:5000/generate-challenges', {
+      const challResponse = await fetch('/generate-challenges', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile)

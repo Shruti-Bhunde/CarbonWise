@@ -10,7 +10,7 @@ from google.genai import types
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist', static_url_path='/')
 CORS(app)
 
 # Database Configuration
@@ -248,6 +248,16 @@ def generate_report():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200
+
+# --- Frontend Serving ---
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return app.send_static_file(path)
+    else:
+        return app.send_static_file('index.html')
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
