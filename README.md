@@ -141,3 +141,11 @@ If the frontend runs on a different port from the backend, set:
 - All persistent state is designed to live in the backend database.
 - The app is intended to feel like a sustainability coach, not just a tracker.
 - The chatbot should be able to continue a conversation because previous messages are stored and reloaded.
+
+## Live link
+- Live Application: https://carbon-wise-navy.vercel.app
+- Alternative Mirror: https://carbon-wise-git-main-shruti-bhundes-projects.vercel.app
+
+## Author
+### Shruti Bhunde
+- Linkedin-www.linkedin.com/in/shruti-bhunde-bb9ab0388
