@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from google import genai
+# from google import genai
 from google.genai import types
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -1102,6 +1102,8 @@ def badges(user):
 @app.route("/api/chat", methods=["POST"])
 @require_session_user
 def chat(user):
+    from google import genai
+    from google.genai import types
     data = request.json or {}
     message = (data.get("message") or "").strip()
     if not message:
