@@ -37,7 +37,7 @@ app.config["SESSION_COOKIE_SECURE"] = True
 
 CORS(
     app, 
-    resources={r"/*": {"origins": ["https://carbon-wise-navy.vercel.app", "http://localhost:5173"]}},
+    resources={r"/*": {"origins": ["https://carbon-wise-c4jqh2l8l-shruti-bhundes-projects.vercel.app/", "http://localhost:5173"]}},
     supports_credentials=True
 )
 db = SQLAlchemy(app)
