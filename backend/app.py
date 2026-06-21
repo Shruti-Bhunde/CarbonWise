@@ -20,10 +20,10 @@ app.secret_key = os.getenv("SECRET_KEY", "carbonwise-dev-secret")
 
 database_url = os.getenv("DATABASE_URL")
 if not database_url:
-    db_user = os.getenv("DB_USER")
-    db_pass = os.getenv("DB_PASS")
-    db_host = os.getenv("DB_HOST")
-    db_name = os.getenv("DB_NAME")
+    db_user = os.environ.get('DB_USER')
+    db_pass = os.environ.get('DB_PASS')
+    db_host = os.environ.get('DB_HOST')
+    db_name = os.environ.get('DB_NAME')
     if db_user and db_pass and db_host and db_name:
         database_url = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}"
     else:
@@ -32,9 +32,14 @@ if not database_url:
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
 
-CORS(app, supports_credentials=True)
+CORS(
+    app, 
+    resources={r"/*": {"origins": ["https://carbon-wise-navy.vercel.app", "http://localhost:5173"]}},
+    supports_credentials=True
+)
 db = SQLAlchemy(app)
 
 
