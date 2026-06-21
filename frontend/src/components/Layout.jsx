@@ -1,17 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Compass, Award, BarChart2, LogOut } from 'lucide-react';
-import { getPoints, getStreak, isLoggedIn, getUser, logoutUser } from '../utils/storage';
+import { useAuth } from '../context/AuthContext';
 
 export default function Layout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Re-read from storage on every render so header always matches page state
-  const points = getPoints();
-  const streak = getStreak();
-  const loggedIn = isLoggedIn();
-  const user = getUser();
+  const { user, loading, logout } = useAuth();
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
@@ -22,18 +17,22 @@ export default function Layout({ children }) {
 
   const authPages = ['/', '/login', '/register', '/assessment'];
   const isMinimal = authPages.includes(location.pathname);
+  const points = user?.points || 0;
+  const streak = user?.streak || 0;
+  const loggedIn = !!user;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F4F6F0] pb-24">
+    <div className="flex flex-col min-h-screen bg-[#F4F6F0] pb-24 relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_left,_rgba(77,124,91,0.12),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(22,101,52,0.08),_transparent_35%)]" />
       {/* Top Banner Header */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-eco-border px-8 py-4 flex justify-between items-center w-full">
+      <header className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-eco-border px-6 md:px-8 py-4 flex justify-between items-center w-full">
         <Link to={loggedIn ? '/dashboard' : '/'} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-eco-green flex items-center justify-center text-white font-bold text-sm">C</div>
           <span className="font-bold font-sans text-eco-dark tracking-tight text-lg">CarbonWise</span>
         </Link>
         
         {/* Show stats only when logged in and not on auth pages */}
-        {loggedIn && !isMinimal && (
+        {!loading && loggedIn && !isMinimal && (
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-4 py-1.5 rounded-full text-xs font-semibold text-amber-700">
               <span className="text-base">🔥</span>
@@ -47,7 +46,7 @@ export default function Layout({ children }) {
                 <div className="bg-eco-dark/5 border border-eco-border px-3 py-1.5 rounded-full text-xs font-semibold text-eco-dark">
                   👤 {user.name.split(' ')[0]}
                 </div>
-                <button onClick={() => { logoutUser(); navigate('/'); }} className="bg-white border border-eco-border text-eco-dark px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+                <button onClick={async () => { await logout(); navigate('/'); }} className="bg-white border border-eco-border text-eco-dark px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
                   <LogOut className="w-3.5 h-3.5" />
                   Log Out
                 </button>
@@ -58,12 +57,12 @@ export default function Layout({ children }) {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-8 relative z-10">
         {children}
       </main>
 
       {/* Bottom Nav - only on authenticated, non-auth pages */}
-      {loggedIn && !isMinimal && (
+      {!loading && loggedIn && !isMinimal && (
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-eco-border py-3.5 px-8 flex justify-around items-center z-40 shadow-lg">
           <div className="max-w-6xl w-full mx-auto flex justify-around items-center">
             {navItems.map((item) => {
