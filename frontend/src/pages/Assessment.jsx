@@ -142,8 +142,11 @@ export default function Assessment() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    const baseUrl = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000' 
+    : '';
     try {
-      const response = await fetch('/analyze-profile', {
+      const response = await fetch(`${baseurl}/analyze-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -151,7 +154,7 @@ export default function Assessment() {
       const analysis = await response.json();
       
       // Generate initial daily challenges
-      const challResponse = await fetch('/generate-challenges', {
+      const challResponse = await fetch(`${baseurl}/generate-challenges`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)

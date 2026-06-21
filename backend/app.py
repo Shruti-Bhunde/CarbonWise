@@ -5,21 +5,22 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from google import genai
 from google.genai import types
 
 load_dotenv()
 
-app = Flask(__name__, static_folder='dist', static_url_path='/') //deploy
+app = Flask(__name__, static_folder='dist', static_url_path='/') #deploy
 CORS(app)
 
 # Database Configuration
 # In a real scenario, the password and host should be in environment variables
 # DB connection string for Cloud SQL
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASS = os.getenv("DB_PASS", "password10")
-DB_HOST = os.getenv("DB_HOST", "34.123.230.20")
-DB_NAME = os.getenv("DB_NAME", "carbonwise_db")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -32,6 +33,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     points = db.Column(db.Integer, default=0)
     streak = db.Column(db.Integer, default=0)
     streak_last_date = db.Column(db.String(20), nullable=True) # YYYY-MM-DD
@@ -109,14 +111,17 @@ def register():
     data = request.json
     email = data.get('email')
     name = data.get('name')
-    if not email or not name:
-        return jsonify({"error": "Missing name or email"}), 400
+    password = data.get('password')
+    
+    if not email or not name or not password:
+        return jsonify({"error": "Missing required fields"}), 400
     
     user = User.query.filter_by(email=email).first()
     if user:
         return jsonify({"error": "User already exists"}), 400
         
-    user = User(email=email, name=name)
+    pwd_hash = generate_password_hash(password)
+    user = User(email=email, name=name, password_hash=pwd_hash)
     db.session.add(user)
     db.session.commit()
     
@@ -126,9 +131,11 @@ def register():
 def login():
     data = request.json
     email = data.get('email')
+    password = data.get('password')
+    
     user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+    if not user or not check_password_hash(user.password_hash, password):
+        return jsonify({"error": "Invalid email or password"}), 401
     
     return jsonify({
         "message": "Success",
@@ -137,7 +144,8 @@ def login():
             "email": user.email,
             "name": user.name,
             "points": user.points,
-            "streak": user.streak
+            "streak": user.streak,
+            "streak_last_date": user.streak_last_date
         }
     })
 
